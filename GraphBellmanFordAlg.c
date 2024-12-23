@@ -6,10 +6,10 @@
 // GraphBellmanFord - Bellman-Ford Algorithm
 //
 
-// Student Name :
-// Student Number :
-// Student Name :
-// Student Number :
+// Student Name : Eduardo Romano
+// Student Number : 118736
+// Student Name : Daniel Martins
+// Student Number : 115868
 
 /*** COMPLETE THE GraphBellmanFordAlgExecute FUNCTION ***/
 
@@ -66,7 +66,44 @@ GraphBellmanFordAlg* GraphBellmanFordAlgExecute(Graph* g,
   
   // THE ALGORTIHM TO BUILD THE SHORTEST-PATHS TREE
 
-  return NULL;
+  result->marked = (unsigned int*)calloc(numVertices, sizeof(unsigned int));
+  result->distance = (int*)malloc(numVertices * sizeof(int));
+  result->predecessor = (int*)malloc(numVertices * sizeof(int));
+  assert(result->marked != NULL && result->distance != NULL && result->predecessor != NULL);
+
+  // Initialize distances and predecessors
+  for (unsigned int i = 0; i < numVertices; i++) {
+    result->distance[i] = 999999;
+    result->predecessor[i] = -1;
+    result->marked[i] = 0;
+  }
+  result->distance[startVertex] = 0;
+
+  for (unsigned int i = 1; i< numVertices; i++){
+    for (unsigned int u = 0; u< numVertices; u++){
+      unsigned int* adj_vertices = GraphGetAdjacentsTo(g, u);
+
+      unsigned int degree = 0;
+      if (GraphIsDigraph(g) == 1) { degree = GraphGetVertexOutDegree(g, u); }
+      else { degree = GraphGetVertexDegree(g, u); }
+
+      for (unsigned int j = 0; j<degree; j++){
+        unsigned int v = adj_vertices[j];
+        if (result->distance[u] + 1 < result->distance[v]){
+          result->distance[v] = result->distance[u] + 1;
+          result->predecessor[v] = u;
+          result->marked[v] = 1;      
+        }
+      }
+      free (adj_vertices);
+    }
+  }
+  
+  for (unsigned int i = 0; i<numVertices; i++){
+    if(result->marked[i] == 0) result->distance[i] = -1;
+  }
+
+  return result;
 }
 
 void GraphBellmanFordAlgDestroy(GraphBellmanFordAlg** p) {
