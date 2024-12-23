@@ -160,6 +160,7 @@ Graph* GraphCreateTranspose(const Graph* g) {
     }
   }
 
+  GraphCheckInvariants(new_g);
   return new_g;
 }
 
