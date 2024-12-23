@@ -6,10 +6,10 @@
 // Graph - Using a list of adjacency lists representation
 //
 
-// Student Name :
-// Student Number :
-// Student Name :
-// Student Number :
+// Student Name : Eduardo Romano
+// Student Number : 118736
+// Student Name : Daniel Martin
+// Student Number : 115868
 
 /*** COMPLETE THE GraphCreateTranspose FUNCTION ***/
 
@@ -138,8 +138,29 @@ Graph* GraphCreateTranspose(const Graph* g) {
   assert(g->isComplete == 0);
 
   // COMPLETE THE CODE
+  int isWeighted = g->isWeighted;
+  int numVertices = g->numVertices;
+  Graph* new_g = GraphCreate(numVertices, 1, isWeighted);
 
-  return NULL;
+  List* vertices = g->verticesList;
+  ListMoveToHead(vertices);
+  unsigned int i = 0;
+  for (; i < g->numVertices; ListMoveToNext(vertices), i++) {
+    struct _Vertex* v = ListGetCurrentItem(vertices);
+    List* edges = v->edgesList;
+    ListMoveToHead(edges);
+    unsigned int j = 0;
+    for(; j < v->outDegree; ListMoveToNext(edges), j++){
+      struct _Edge* edge = ListGetCurrentItem(edges);
+      unsigned int adj_v = edge->adjVertex;
+      if (isWeighted)
+        GraphAddWeightedEdge(new_g, adj_v, v->id, edge->weight);
+      else
+        GraphAddEdge(new_g, adj_v, v->id);
+    }
+  }
+
+  return new_g;
 }
 
 void GraphDestroy(Graph** p) {
