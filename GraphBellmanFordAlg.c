@@ -33,77 +33,83 @@ struct _GraphBellmanFordAlg {
   unsigned int startVertex;  // The root of the shortest-paths tree
 };
 
-GraphBellmanFordAlg* GraphBellmanFordAlgExecute(Graph* g,
+GraphBellmanFordAlg* GraphBellmanFordAlgExecute(Graph* g, 
                                                 unsigned int startVertex) {
-  assert(g != NULL);
-  assert(startVertex < GraphGetNumVertices(g));
-  assert(GraphIsWeighted(g) == 0);
+    assert(g != NULL);
+    assert(startVertex < GraphGetNumVertices(g));
+    assert(GraphIsWeighted(g) == 0); // Ensure unweighted graph
 
-  GraphBellmanFordAlg* result =
-      (GraphBellmanFordAlg*)malloc(sizeof(struct _GraphBellmanFordAlg));
-  assert(result != NULL);
+    GraphBellmanFordAlg* result = 
+        (GraphBellmanFordAlg*)malloc(sizeof(struct _GraphBellmanFordAlg));
+    assert(result != NULL);
 
-  // Given graph and start vertex for the shortest-paths
-  result->graph = g;
-  result->startVertex = startVertex;
+    result->graph = g;
+    result->startVertex = startVertex;
+    unsigned int numVertices = GraphGetNumVertices(g);
 
-  unsigned int numVertices = GraphGetNumVertices(g);
+    // Allocate and initialize arrays
+    result->marked = (unsigned int*)calloc(numVertices, sizeof(unsigned int));
+    result->distance = (int*)malloc(numVertices * sizeof(int));
+    result->predecessor = (int*)malloc(numVertices * sizeof(int));
+    assert(result->marked != NULL && result->distance != NULL && result->predecessor != NULL);
 
-  //
-  // TO BE COMPLETED !!
-  //
-  // CREATE AND INITIALIZE
-  // result->marked
-  // result->distance
-  // result->predecessor
-  //
-
-  // Mark all vertices as not yet visited, i.e., ZERO
-  
-  // No vertex has (yet) a (valid) predecessor
-  
-  // No vertex has (yet) a (valid) distance to the start vertex
-  
-  // THE ALGORTIHM TO BUILD THE SHORTEST-PATHS TREE
-
-  result->marked = (unsigned int*)calloc(numVertices, sizeof(unsigned int));
-  result->distance = (int*)malloc(numVertices * sizeof(int));
-  result->predecessor = (int*)malloc(numVertices * sizeof(int));
-  assert(result->marked != NULL && result->distance != NULL && result->predecessor != NULL);
-
-  // Initialize distances and predecessors
-  for (unsigned int i = 0; i < numVertices; i++) {
-    result->distance[i] = 999999;
-    result->predecessor[i] = -1;
-    result->marked[i] = 0;
-  }
-  result->distance[startVertex] = 0;
-
-  for (unsigned int i = 1; i< numVertices; i++){
-    for (unsigned int u = 0; u< numVertices; u++){
-      unsigned int* adj_vertices = GraphGetAdjacentsTo(g, u);
-
-      unsigned int degree = 0;
-      if (GraphIsDigraph(g) == 1) { degree = GraphGetVertexOutDegree(g, u); }
-      else { degree = GraphGetVertexDegree(g, u); }
-
-      for (unsigned int j = 0; j<degree; j++){
-        unsigned int v = adj_vertices[j];
-        if (result->distance[u] + 1 < result->distance[v]){
-          result->distance[v] = result->distance[u] + 1;
-          result->predecessor[v] = u;
-          result->marked[v] = 1;      
-        }
-      }
-      free (adj_vertices);
+    // Initialize distances and predecessors
+    for (unsigned int i = 0; i < numVertices; i++) {
+        result->distance[i] = 9999999; // Initialize with infinity
+        result->predecessor[i] = -1;
+        result->marked[i] = 0;
     }
-  }
-  
-  for (unsigned int i = 0; i<numVertices; i++){
-    if(result->marked[i] == 0) result->distance[i] = -1;
-  }
+    result->distance[startVertex] = 0; 
 
-  return result;
+    // Relaxation phase (V-1 iterations)
+    for (unsigned int i = 0; i < numVertices - 1; i++) {
+        for (unsigned int u = 0; u < numVertices; u++) {
+            unsigned int* adj_vertices = GraphGetAdjacentsTo(g, u);
+            unsigned int degree = 0;
+            if (GraphIsDigraph(g) == 1) { 
+                degree = GraphGetVertexOutDegree(g, u); 
+            } else { 
+                degree = GraphGetVertexDegree(g, u); 
+            }
+            for (unsigned int j = 0; j < degree; j++) {
+                unsigned int v = adj_vertices[j];
+                // Since it's unweighted, edge weight is 1
+                if (result->distance[u] != 9999999 && 
+                    result->distance[u] + 1 < result->distance[v]) {
+                    result->distance[v] = result->distance[u] + 1;
+                    result->predecessor[v] = u;
+                    result->marked[v] = 1;
+                }
+            }
+            free(adj_vertices);
+        }
+    }
+
+    // Negative cycle detection
+    for (unsigned int u = 0; u < numVertices; u++) {
+        unsigned int* adj_vertices = GraphGetAdjacentsTo(g, u);
+        unsigned int degree = 0;
+        if (GraphIsDigraph(g) == 1) { 
+            degree = GraphGetVertexOutDegree(g, u); 
+        } else { 
+            degree = GraphGetVertexDegree(g, u); 
+        }
+        for (unsigned int j = 0; j < degree; j++) {
+            unsigned int v = adj_vertices[j];
+            if (result->distance[u] != 9999999 && 
+                result->distance[u] + 1 < result->distance[v]) {
+                // Negative cycle detected
+                free(result->marked);
+                free(result->distance);
+                free(result->predecessor);
+                free(result);
+                return NULL; 
+            }
+        }
+        free(adj_vertices);
+    }
+
+    return result;
 }
 
 void GraphBellmanFordAlgDestroy(GraphBellmanFordAlg** p) {
