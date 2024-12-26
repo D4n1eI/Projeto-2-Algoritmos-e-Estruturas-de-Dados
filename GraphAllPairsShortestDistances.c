@@ -36,8 +36,26 @@ GraphAllPairsShortestDistances* GraphAllPairsShortestDistancesExecute(
   assert(g != NULL);
 
   // COMPLETE THE CODE
+  assert(GraphIsDigraph(g));
+  assert(!GraphIsWeighted(g));
 
-  return NULL;
+  GraphAllPairsShortestDistances* result =
+      (GraphAllPairsShortestDistances*)malloc(sizeof(struct _GraphAllPairsShortestDistances));
+  assert(result != NULL);
+
+  result->graph = g;
+  unsigned int numVertices = GraphGetNumVertices(g);
+  result->distance = (int**)malloc(sizeof(int*)*numVertices);
+  for (unsigned int v = 0; v<numVertices; v++){
+    result->distance[v] = (int*)malloc(sizeof(int)*numVertices);
+    GraphBellmanFordAlg* bellman_alg = GraphBellmanFordAlgExecute(g, v);
+    for (unsigned int bellman_v = 0; bellman_v<numVertices; bellman_v++){
+      result->distance[v][bellman_v] = GraphBellmanFordAlgDistance(bellman_alg, bellman_v);
+    }
+    GraphBellmanFordAlgDestroy(&bellman_alg);
+  }
+
+  return result;
 }
 
 void GraphAllPairsShortestDistancesDestroy(GraphAllPairsShortestDistances** p) {

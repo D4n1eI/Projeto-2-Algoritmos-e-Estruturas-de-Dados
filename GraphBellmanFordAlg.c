@@ -98,6 +98,12 @@ GraphBellmanFordAlg* GraphBellmanFordAlgExecute(Graph* g,
     }
   }
 
+  for(unsigned int i = 0; i< numVertices; i++){
+    if (result->distance[i] == 9999999){
+      result->distance[i] = -1;
+    }
+  }
+
   return result;
 }
 
