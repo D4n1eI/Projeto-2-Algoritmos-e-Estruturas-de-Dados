@@ -72,6 +72,10 @@ GraphBellmanFordAlg* GraphBellmanFordAlgExecute(Graph* g,
   result->predecessor = (int*)malloc(numVertices * sizeof(int));
   assert(result->marked != NULL && result->distance != NULL && result->predecessor != NULL);
 
+  InstrCount[0] += sizeof(struct _GraphBellmanFordAlg); //Estrutura
+  InstrCount[0] += sizeof(unsigned int)*numVertices; //Array marked
+  InstrCount[0] += 2*sizeof(int)*numVertices; //Array prececessor e distance
+
   // Initialize distances and predecessors
   for (unsigned int i = 0; i < numVertices; i++) {
     result->distance[i] = 9999999; // Initialize with infinity
@@ -98,11 +102,15 @@ GraphBellmanFordAlg* GraphBellmanFordAlgExecute(Graph* g,
     }
   }
 
+  InstrCount[0] += sizeof(unsigned int)*(numVertices); //Espaço ocupado temporariamente (adj_vertices) para o no pior caso (valor do tamanho + numVertices-1) 
+  //InstrCount[0] += sizeof(unsigned int); //Espaço ocupado temporariamente (adj_vetices) para o melhor caso (valor do tamanho)
+  
   for(unsigned int i = 0; i< numVertices; i++){
     if (result->distance[i] == 9999999){
       result->distance[i] = -1;
     }
   }
+
 
   return result;
 }

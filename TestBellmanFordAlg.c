@@ -10,6 +10,7 @@
 
 #include "Graph.h"
 #include "GraphBellmanFordAlg.h"
+#include "instrumentation.h"
 
 int main(void) {
   // What kind of graph is dig01?
@@ -93,6 +94,18 @@ int main(void) {
   GraphDestroy(&g01);
   GraphDestroy(&dig01);
   GraphDestroy(&dig03);
+
+  InstrCalibrate();
+  InstrName[0] = "OCCUPIED";
+  for (int n=2; n<257; n*=2){
+    Graph* graph = GraphCreateComplete(n, 1); //Pior Caso (vazio)
+    //Graph* graph = GraphCreate(n, 1, 0); //Melhor Caso (completo)
+    InstrReset();
+    GraphBellmanFordAlg* bf = GraphBellmanFordAlgExecute(graph, 0);
+    InstrPrint();
+    GraphBellmanFordAlgDestroy(&bf);
+    GraphDestroy(&graph);
+  }
 
   return 0;
 }
