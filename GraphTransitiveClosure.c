@@ -33,14 +33,19 @@ Graph* GraphComputeTransitiveClosure(Graph* g) {
 
   // COMPLETE THE CODE
   unsigned int numVertices = GraphGetNumVertices(g);
-  Graph* fecho_transivito = GraphCreate(numVertices, GraphIsDigraph(g), GraphIsWeighted(g));
+  Graph* fecho_transivito = GraphCreate(numVertices, GraphIsDigraph(g), GraphIsWeighted(g)); //Cria-se um grafo com o mesmo numero de vertices
+
   for (unsigned int v = 0; v<numVertices; v++){
+    //Itera-se sobre cada vertice, usando o algoritmo de BellmanFord para cada um
     GraphBellmanFordAlg* bellman_alg = GraphBellmanFordAlgExecute(g, v);
+    
     for (unsigned int bellman_v = 0; bellman_v<numVertices; bellman_v++){
+      //Para todos os vertices que nao sao o atual, se foram alcançados, adiciona-se uma aresta
       if (v != bellman_v && GraphBellmanFordAlgReached(bellman_alg, bellman_v)){
         GraphAddEdge(fecho_transivito, v, bellman_v);
       }
     }
+    //Liberta-se as estruturas auxiliares
     GraphBellmanFordAlgDestroy(&bellman_alg);
   }
   

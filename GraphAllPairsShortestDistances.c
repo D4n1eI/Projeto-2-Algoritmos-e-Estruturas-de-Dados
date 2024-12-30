@@ -37,7 +37,7 @@ GraphAllPairsShortestDistances* GraphAllPairsShortestDistancesExecute(
 
   // COMPLETE THE CODE
   assert(GraphIsDigraph(g));
-  assert(!GraphIsWeighted(g));
+  assert(GraphIsWeighted(g) == 0);
 
   GraphAllPairsShortestDistances* result =
       (GraphAllPairsShortestDistances*)malloc(sizeof(struct _GraphAllPairsShortestDistances));
@@ -45,13 +45,14 @@ GraphAllPairsShortestDistances* GraphAllPairsShortestDistancesExecute(
 
   result->graph = g;
   unsigned int numVertices = GraphGetNumVertices(g);
-  result->distance = (int**)malloc(sizeof(int*)*numVertices);
+  result->distance = (int**)malloc(sizeof(int*)*numVertices); //Aloca-se numVertices arrays de inteiros
   for (unsigned int v = 0; v<numVertices; v++){
-    result->distance[v] = (int*)malloc(sizeof(int)*numVertices);
+    result->distance[v] = (int*)malloc(sizeof(int)*numVertices);//Cada array terá um tamanho de numVertices
     GraphBellmanFordAlg* bellman_alg = GraphBellmanFordAlgExecute(g, v);
     for (unsigned int bellman_v = 0; bellman_v<numVertices; bellman_v++){
-      result->distance[v][bellman_v] = GraphBellmanFordAlgDistance(bellman_alg, bellman_v);
+      result->distance[v][bellman_v] = GraphBellmanFordAlgDistance(bellman_alg, bellman_v); //Coloca-se a distancia entre os dois vertices na posição (v, bellman_b)
     }
+    //Liberta-se as estruturas auxiliares
     GraphBellmanFordAlgDestroy(&bellman_alg);
   }
 

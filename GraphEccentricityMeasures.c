@@ -52,58 +52,72 @@ GraphEccentricityMeasures* GraphEccentricityMeasuresCompute(Graph* g) {
   // Fill in the central vertices array
 
   assert(GraphIsDigraph(g));
-  assert(!GraphIsWeighted(g));
+  assert(GraphIsWeighted(g) == 0);
 
   GraphEccentricityMeasures* result = (GraphEccentricityMeasures*)malloc(sizeof(GraphEccentricityMeasures));
   result->graph = g;
 
+  //Determina-se a matriz de distancias
   GraphAllPairsShortestDistances* distance_matrix_graph = GraphAllPairsShortestDistancesExecute(g);
   
+  //Inicializa-se os valores
   unsigned int numVertices = GraphGetNumVertices(g);
   result->eccentricity = (int*)malloc(sizeof(int)*numVertices);
   int radius = 0;
   int diameter = 0;
   int currEccentricity = 0;
+
+  //Determina-se a excentricidade de um vertice v, calculando a sua distancia entre cada vertice w
   for(unsigned int v = 0; v<numVertices; v++){
     for(unsigned int w = 0; w<numVertices; w++){
-      if (v == w) continue;
+      if (v == w) continue; //Igora-se a si proprio
+
       int distanceVW = GraphGetDistanceVW(distance_matrix_graph, v, w);
-      if (distanceVW == -1){
+      if (distanceVW == -1){ //Se a distancia for -1 (unreachable), a excentricidade vai ser imediatamente -1 (terminando o loop entre w)
         currEccentricity = -1;
         break;
       }
-      if (currEccentricity < distanceVW){
+
+      //Se w for alcançavel
+      if (currEccentricity < distanceVW){ //Se a distancia for maior do que a excentricidade atual, atualiza-a
         currEccentricity = distanceVW;
       }
     }
-    result->eccentricity[v] = currEccentricity;
+
+    result->eccentricity[v] = currEccentricity; //Atribui a excentricidade ao vertice v
     if (currEccentricity == -1){
-      diameter = -1; //Diameter is undifined
+      diameter = -1; //Se for unreachable, o diametro também o será
     }
-    if (diameter != -1 && diameter < currEccentricity) diameter = currEccentricity; //If diameter is already indefinite skip
-    if (currEccentricity != -1 && (radius > currEccentricity || radius == 0)) { //If Eccentricity is indefinite skip, else, if radius is still 0 or greater than Eccentricity, update it
+    if (diameter != -1 && diameter < currEccentricity) diameter = currEccentricity; //Se o diametro não for unreachable e for menor do que a excentricidade de v, atualiza
+    if (currEccentricity != -1 && (radius == 0 || radius > currEccentricity)) { //Se a excentricidade não for unreachable e (se o raio ainda não foi atualizado ou é maior do que a excentricidade) atualiza-o
       radius = currEccentricity; 
     } 
-    currEccentricity = 0;
+    currEccentricity = 0; //Reset da excentricidade
   }
-  result->graphDiameter = diameter;
-  result->graphRadius = (radius == 0) ? -1 : radius; //If eccentricity is allways indefinite, the radius will still be zero
 
+  //atribui o raio e diametro
+  result->graphDiameter = diameter;
+  result->graphRadius = (radius == 0) ? -1 : radius; //Se o raio nunca foi atualizado (ainda é zero), todos os vertices têm excentridicade -1, fazendo o raio ser -1 também
+
+ //Liberta as estruturas auxiliares
   GraphAllPairsShortestDistancesDestroy(&distance_matrix_graph);
 
+  //Determinação dos vértices centrais
   unsigned int count = 0;
+  //Conta o numero de vezes que a excentricidade de um vertice é igual ao raio
   for (unsigned int v = 0; v<numVertices; v++){
     if (result->eccentricity[v] == result->graphRadius){
       count++;
     }
   }
 
-  unsigned int* centralVertices = (unsigned int*)malloc(sizeof(unsigned int)*count+1);
-  centralVertices[0] = count;
+  //Alloca a memoria para o array
+  unsigned int* centralVertices = (unsigned int*)malloc(sizeof(unsigned int)*count+1); //numero de vertices centrais + 1 (elemento de indice 0 com o numero de vertices)
+  centralVertices[0] = count;//atribui o valor inicial ao array
   int i = 1;
   for (unsigned int v = 0; v<numVertices; v++){
     if (result->eccentricity[v] == result->graphRadius){
-      centralVertices[i++] = v;
+      centralVertices[i++] = v; //coloca o vertice central no array
     }
   }
   result->centralVertices = centralVertices;

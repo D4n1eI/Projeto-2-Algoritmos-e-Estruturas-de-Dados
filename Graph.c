@@ -140,20 +140,19 @@ Graph* GraphCreateTranspose(const Graph* g) {
   // COMPLETE THE CODE
   int isWeighted = g->isWeighted;
   int numVertices = g->numVertices;
-  Graph* new_g = GraphCreate(numVertices, 1, isWeighted);
+  Graph* new_g = GraphCreate(numVertices, 1, isWeighted); //Cria-se um novo grafo
 
   List* vertices = g->verticesList;
   ListMoveToHead(vertices);
-  unsigned int i = 0;
-  for (; i < g->numVertices; ListMoveToNext(vertices), i++) {
+  for (unsigned int i = 0; i < g->numVertices; ListMoveToNext(vertices), i++) { //Itera-se pela lista de vertices
     struct _Vertex* v = ListGetCurrentItem(vertices);
-    List* edges = v->edgesList;
+
+    List* edges = v->edgesList; //Lista de arestas do vertice atual
     ListMoveToHead(edges);
-    unsigned int j = 0;
-    for(; j < v->outDegree; ListMoveToNext(edges), j++){
+    for(unsigned int j = 0; j < v->outDegree; ListMoveToNext(edges), j++){ //Itera-se pela lista de arestas
       struct _Edge* edge = ListGetCurrentItem(edges);
       unsigned int adj_v = edge->adjVertex;
-      if (isWeighted)
+      if (isWeighted) //Adiciona-se uma aresta de direção contrária, tendo ou não um peso associado
         GraphAddWeightedEdge(new_g, adj_v, v->id, edge->weight);
       else
         GraphAddEdge(new_g, adj_v, v->id);

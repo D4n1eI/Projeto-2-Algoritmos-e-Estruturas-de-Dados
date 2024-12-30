@@ -66,38 +66,43 @@ GraphBellmanFordAlg* GraphBellmanFordAlgExecute(Graph* g,
   
   // THE ALGORTIHM TO BUILD THE SHORTEST-PATHS TREE
 
-  // Allocate and initialize arrays
+  // Aloca-se arrays da estrutura
   result->marked = (unsigned int*)calloc(numVertices, sizeof(unsigned int));
   result->distance = (int*)malloc(numVertices * sizeof(int));
   result->predecessor = (int*)malloc(numVertices * sizeof(int));
   assert(result->marked != NULL && result->distance != NULL && result->predecessor != NULL);
 
   InstrCount[0] += sizeof(struct _GraphBellmanFordAlg); //Estrutura
-  InstrCount[0] += sizeof(unsigned int)*numVertices; //Array marked
+  InstrCount[0] += sizeof(unsigned int)*numVertices+1; //Array marked
   InstrCount[0] += 2*sizeof(int)*numVertices; //Array prececessor e distance
 
-  // Initialize distances and predecessors
+  // Inicializa os valores dos arrays
   for (unsigned int i = 0; i < numVertices; i++) {
-    result->distance[i] = 9999999; // Initialize with infinity
+    result->distance[i] = 9999999; // representa infinidade
     result->predecessor[i] = -1;
     result->marked[i] = 0;
   }
-  result->distance[startVertex] = 0; 
+  result->distance[startVertex] = 0; //distancia do inicial é 0
 
-  // Relaxation phase (V-1 iterations)
-  for (unsigned int i = 0; i < numVertices - 1; i++) {
-    for (unsigned int u = 0; u < numVertices; u++) {
-      unsigned int* adj_vertices = GraphGetAdjacentsTo(g, u);
-      for (unsigned int j = 1; j <= adj_vertices[0]; j++) {
-        unsigned int v = adj_vertices[j];
-        // Since it's unweighted, edge weight is 1
-        if (result->distance[u] != 9999999 && 
-          result->distance[u] + 1 < result->distance[v]) {
-          result->distance[v] = result->distance[u] + 1;
-          result->predecessor[v] = u;
-          result->marked[v] = 1;
+  // Fase de relaxamento (V-1 iteracoes)
+  for (unsigned int relaxation = 0; relaxation < numVertices - 1; relaxation++) {
+    
+    for (unsigned int vertice = 0; vertice < numVertices; vertice++) { //Itera sobre todos os vértices
+      unsigned int* adj_vertices = GraphGetAdjacentsTo(g, vertice); //Determina os adjacentes
+      for (unsigned int i_adj = 1; i_adj <= adj_vertices[0]; i_adj++) {
+        unsigned int adjacente = adj_vertices[i_adj];
+
+        //Se o vertice já tiver sido alcançado (distancia não infinita) e a distancia do vertice + 1 for menor do que a distancia atual do adjacente
+        if (result->distance[vertice] != 9999999 &&
+          result->distance[vertice] + 1 < result->distance[adjacente]) {
+
+          //Atualiza a distancia atual do ajacente para a do vertice + 1, sendo o ajacente marcado e o seu predecessor será o vertice
+          result->distance[adjacente] = result->distance[vertice] + 1;
+          result->predecessor[adjacente] = vertice;
+          result->marked[adjacente] = 1;
         }
       }
+      //Liberta-se as estruturas auxiliares
       free(adj_vertices);
     }
   }
@@ -105,7 +110,7 @@ GraphBellmanFordAlg* GraphBellmanFordAlgExecute(Graph* g,
   InstrCount[0] += sizeof(unsigned int)*(numVertices); //Espaço ocupado temporariamente (adj_vertices) para o no pior caso (valor do tamanho + numVertices-1) 
   //InstrCount[0] += sizeof(unsigned int); //Espaço ocupado temporariamente (adj_vetices) para o melhor caso (valor do tamanho)
   
-  for(unsigned int i = 0; i< numVertices; i++){
+  for(unsigned int i = 0; i< numVertices; i++){ //Todos os vertices que continuam com distancia infinita, ficam com distancia -1
     if (result->distance[i] == 9999999){
       result->distance[i] = -1;
     }
