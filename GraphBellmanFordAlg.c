@@ -107,8 +107,8 @@ GraphBellmanFordAlg* GraphBellmanFordAlgExecute(Graph* g,
     }
   }
 
-  InstrCount[0] += sizeof(unsigned int)*(numVertices); //Espaço ocupado temporariamente (adj_vertices) para o no pior caso (valor do tamanho + numVertices-1) 
-  //InstrCount[0] += sizeof(unsigned int); //Espaço ocupado temporariamente (adj_vetices) para o melhor caso (valor do tamanho)
+  //InstrCount[0] += sizeof(unsigned int)*(numVertices); //Espaço ocupado temporariamente (adj_vertices) para o no pior caso (valor do tamanho + numVertices-1) 
+  InstrCount[0] += sizeof(unsigned int); //Espaço ocupado temporariamente (adj_vetices) para o melhor caso (valor do tamanho)
   
   for(unsigned int i = 0; i< numVertices; i++){ //Todos os vertices que continuam com distancia infinita, ficam com distancia -1
     if (result->distance[i] == 9999999){

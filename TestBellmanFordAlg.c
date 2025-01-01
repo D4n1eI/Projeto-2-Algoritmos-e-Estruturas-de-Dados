@@ -98,8 +98,8 @@ int main(void) {
   InstrCalibrate();
   InstrName[0] = "OCCUPIED";
   for (int n=2; n<257; n*=2){
-    Graph* graph = GraphCreateComplete(n, 1); //Pior Caso (vazio)
-    //Graph* graph = GraphCreate(n, 1, 0); //Melhor Caso (completo)
+    //Graph* graph = GraphCreateComplete(n, 1); //Pior Caso (completo)
+    Graph* graph = GraphCreate(n, 1, 0); //Melhor Caso (vazio)
     InstrReset();
     GraphBellmanFordAlg* bf = GraphBellmanFordAlgExecute(graph, 0);
     InstrPrint();

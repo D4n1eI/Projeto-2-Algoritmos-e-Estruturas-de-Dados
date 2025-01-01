@@ -104,18 +104,22 @@ GraphEccentricityMeasures* GraphEccentricityMeasuresCompute(Graph* g) {
 
   //Determinação dos vértices centrais
   unsigned int count = 0;
-  //Conta o numero de vezes que a excentricidade de um vertice é igual ao raio
-  for (unsigned int v = 0; v<numVertices; v++){
-    if (result->eccentricity[v] == result->graphRadius){
-      count++;
+
+  //Grafos com raio -1 não têm vertices centrais
+  if (result->graphRadius > -1){
+    //Conta o numero de vezes que a excentricidade de um vertice é igual ao raio
+    for (unsigned int v = 0; v<numVertices; v++){
+      if (result->eccentricity[v] == result->graphRadius){
+        count++;
+      }
     }
   }
 
   //Alloca a memoria para o array
   unsigned int* centralVertices = (unsigned int*)malloc(sizeof(unsigned int)*count+1); //numero de vertices centrais + 1 (elemento de indice 0 com o numero de vertices)
   centralVertices[0] = count;//atribui o valor inicial ao array
-  int i = 1;
-  for (unsigned int v = 0; v<numVertices; v++){
+  unsigned int i = 1;
+  for (unsigned int v = 0; i<=count; v++){
     if (result->eccentricity[v] == result->graphRadius){
       centralVertices[i++] = v; //coloca o vertice central no array
     }
@@ -167,10 +171,10 @@ unsigned int* GraphGetCentralVertices(const GraphEccentricityMeasures* p) {
   assert(p->centralVertices != NULL);
 
   // COMPLETE THE CODE
-  unsigned int numVertices = p->centralVertices[0];
+  unsigned int numVertices = p->centralVertices[0]; //Tamanho do set
   unsigned int* centralVertices = (unsigned int*)malloc(sizeof(unsigned int)*numVertices);
   for(unsigned int v=0; v<numVertices; v++){
-    centralVertices[v] = p->centralVertices[v+1];
+    centralVertices[v] = p->centralVertices[v+1]; //Atribui ao array o valor com indice + 1 do array de vertices centrais
   }
 
   return centralVertices;
@@ -182,19 +186,28 @@ unsigned int* GraphGetCentralVertices(const GraphEccentricityMeasures* p) {
 void GraphEccentricityMeasuresPrint(const GraphEccentricityMeasures* p) {
   // COMPLETE THE CODE
 
+  //Raio e diametro
   printf("Radius: %d\nDiameter: %d\n", GraphGetRadius(p), GraphGetDiameter(p));
 
   unsigned int numVertices = GraphGetNumVertices(p->graph);
+  //Excentricidade
   printf("Vertex Eccentricity:\n");
   for (unsigned int v = 0; v<numVertices; v++){
     printf("\t%u: %d\n", v, GraphGetVertexEccentricity(p, v));
   }
   
+  //Vértices centrais
   unsigned int numCentVertices = p->centralVertices[0];
   printf("Central Vertices: [ ");
+  //Imprime todos os valores até ao ultimo
   for (unsigned int cv = 1; cv<numCentVertices; cv++){
     printf("%u, ", p->centralVertices[cv]);
   }
-  printf("%u ]\n", p->centralVertices[numCentVertices]);
+  //Se houver vértices centrais, imprime o ultimo, se não, deixa o array vazio
+  if (numCentVertices>0) {
+    printf("%u ]\n", p->centralVertices[numCentVertices]);
+  } else {
+    printf("N/A ]\n");
+  }
 
 }

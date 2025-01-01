@@ -10,6 +10,7 @@
 
 #include "Graph.h"
 #include "GraphTransitiveClosure.h"
+#include "instrumentation.h"
 
 int main(void) {
   // What kind of graph is dig01?
@@ -55,6 +56,17 @@ int main(void) {
 
   GraphDestroy(&tcdig01);
   GraphDestroy(&tcdig03);
+
+  InstrCalibrate();
+  for (int n=2; n<257; n*=2){
+    //Graph* graph = GraphCreateComplete(n, 1); //Pior Caso (completo)
+    Graph* graph = GraphCreate(n, 1, 0); //Melhor Caso (vazio)
+    InstrReset();
+    Graph* tc = GraphComputeTransitiveClosure(graph);
+    InstrPrint();
+    GraphDestroy(&tc);
+    GraphDestroy(&graph);
+  }
 
   return 0;
 }
